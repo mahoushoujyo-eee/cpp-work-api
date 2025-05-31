@@ -1,0 +1,46 @@
+[
+  {
+    "color" : "#3B82F6",
+    "height" : 50.0,
+    "id" : 1,
+    "name" : "newName",
+    "type" : "Rectangle",
+    "width" : 100.0,
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0
+  },
+  {
+    "color" : "#3B82F6",
+    "height" : 100.0,
+    "id" : 2,
+    "name" : "\u6d4b\u8bd5\u5706\u67f1",
+    "radius" : 100.0,
+    "type" : "Cylinder",
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0
+  },
+  {
+    "color" : "#3B82F6",
+    "id" : 4,
+    "name" : "\u5bb9\u5668\u5b58\u50a8\u5706\u5f62",
+    "radius" : 50.0,
+    "type" : "Circle",
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0
+  },
+  {
+    "color" : "#3B82F6",
+    "height" : 50.0,
+    "id" : 5,
+    "length" : 75.0,
+    "name" : "\u5bb9\u5668\u5b58\u50a8\u7acb\u65b9",
+    "type" : "Cuboid",
+    "width" : 100.0,
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0
+  }
+]
