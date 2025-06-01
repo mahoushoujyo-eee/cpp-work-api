@@ -1,0 +1,24 @@
+src/httplib.h
+
+# Compiled Object files
+*.o
+*.ko
+*.obj
+*.lo
+*.la
+*.al
+*.dll
+*.lib
+*.so
+*.a
+*.mod
+*.pdb
+*.ilk
+*.dSYM/
+*.exe
+*.out
+*.app
+*.bin
+
+# Build directories
+build/
