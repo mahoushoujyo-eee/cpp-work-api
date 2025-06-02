@@ -22,7 +22,7 @@ class GeometryDAO {
 private:
     DatabaseConfig config;
     MYSQL* connection;
-    static int nextId; // 全局ID生成器
+    // 不再需要静态ID生成器，使用数据库自增ID
     
     // 初始化数据库连接
     void initConnection();
@@ -39,8 +39,7 @@ private:
     // 辅助函数：从JSON字符串解析属性
     void parsePropertiesFromJson(const std::string& jsonStr, std::shared_ptr<GeometryPrimitive> primitive);
     
-    // 生成唯一ID
-    int generateId();
+    // 不再需要生成唯一ID方法，使用数据库自增ID
     
 public:
     // 构造函数
@@ -80,8 +79,7 @@ public:
     // 获取图元总数
     int count();
     
-    // 获取下一个可用ID
-    int getNextId();
+    // 不再需要获取下一个可用ID方法，使用数据库自增ID
 };
 
 #endif // GEOMETRY_DAO_H

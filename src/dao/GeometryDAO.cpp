@@ -6,18 +6,7 @@
 #include <sstream>
 #include <iomanip>
 
-// 静态成员初始化
-int GeometryDAO::nextId = 1;
-
-// 生成唯一ID
-int GeometryDAO::generateId() {
-    return nextId++;
-}
-
-// 获取下一个可用ID
-int GeometryDAO::getNextId() {
-    return nextId;
-}
+// 不再需要静态ID生成器相关代码，使用数据库自增ID
 
 // 辅助函数：将属性转换为JSON字符串
 std::string GeometryDAO::propertiesToJson(std::shared_ptr<GeometryPrimitive> primitive) {
@@ -134,12 +123,7 @@ std::shared_ptr<GeometryPrimitive> GeometryDAO::createGeometryFromResult(MYSQL_R
         primitive->setId(id);
     }
     
-    if (primitive) {
-        // 更新nextId以确保唯一性
-        if (id >= nextId) {
-            nextId = id + 1;
-        }
-    }
+    // 不再需要更新nextId，因为我们使用数据库自增ID
     
     return primitive;
 }
@@ -177,14 +161,11 @@ bool GeometryDAO::save(std::shared_ptr<GeometryPrimitive> primitive) {
         return false;
     }
     
-    // 如果图元没有ID，生成一个新的ID
-    if (primitive->getId() == 0) {
-        primitive->setId(generateId());
-    }
+    // 不再手动设置ID，让数据库自动生成
     
     std::string properties = propertiesToJson(primitive);
     
-    std::string sql = "INSERT INTO geometry (id, name, type, color, x, y, z, properties) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    std::string sql = "INSERT INTO geometry (name, type, color, x, y, z, properties) VALUES (?, ?, ?, ?, ?, ?, ?)";
     
     MYSQL_STMT* stmt = mysql_stmt_init(connection);
     if (!stmt) {
@@ -196,47 +177,42 @@ bool GeometryDAO::save(std::shared_ptr<GeometryPrimitive> primitive) {
         return false;
     }
     
-    MYSQL_BIND bind[8];
+    MYSQL_BIND bind[7];
     memset(bind, 0, sizeof(bind));
-    
-    // id
-    int id = primitive->getId();
-    bind[0].buffer_type = MYSQL_TYPE_LONG;
-    bind[0].buffer = &id;
     
     // name
     std::string name = primitive->getName();
-    bind[1].buffer_type = MYSQL_TYPE_STRING;
-    bind[1].buffer = const_cast<char*>(name.c_str());
-    bind[1].buffer_length = name.length();
+    bind[0].buffer_type = MYSQL_TYPE_STRING;
+    bind[0].buffer = const_cast<char*>(name.c_str());
+    bind[0].buffer_length = name.length();
     
     // type
     std::string type = primitive->getType();
-    bind[2].buffer_type = MYSQL_TYPE_STRING;
-    bind[2].buffer = const_cast<char*>(type.c_str());
-    bind[2].buffer_length = type.length();
+    bind[1].buffer_type = MYSQL_TYPE_STRING;
+    bind[1].buffer = const_cast<char*>(type.c_str());
+    bind[1].buffer_length = type.length();
     
     // color
     std::string color = primitive->getColor();
-    bind[3].buffer_type = MYSQL_TYPE_STRING;
-    bind[3].buffer = const_cast<char*>(color.c_str());
-    bind[3].buffer_length = color.length();
+    bind[2].buffer_type = MYSQL_TYPE_STRING;
+    bind[2].buffer = const_cast<char*>(color.c_str());
+    bind[2].buffer_length = color.length();
     
     // x, y, z
     double x = primitive->getPosition().x;
     double y = primitive->getPosition().y;
     double z = primitive->getPosition().z;
+    bind[3].buffer_type = MYSQL_TYPE_DOUBLE;
+    bind[3].buffer = &x;
     bind[4].buffer_type = MYSQL_TYPE_DOUBLE;
-    bind[4].buffer = &x;
+    bind[4].buffer = &y;
     bind[5].buffer_type = MYSQL_TYPE_DOUBLE;
-    bind[5].buffer = &y;
-    bind[6].buffer_type = MYSQL_TYPE_DOUBLE;
-    bind[6].buffer = &z;
+    bind[5].buffer = &z;
     
     // properties
-    bind[7].buffer_type = MYSQL_TYPE_STRING;
-    bind[7].buffer = const_cast<char*>(properties.c_str());
-    bind[7].buffer_length = properties.length();
+    bind[6].buffer_type = MYSQL_TYPE_STRING;
+    bind[6].buffer = const_cast<char*>(properties.c_str());
+    bind[6].buffer_length = properties.length();
     
     if (mysql_stmt_bind_param(stmt, bind)) {
         mysql_stmt_close(stmt);
@@ -244,8 +220,14 @@ bool GeometryDAO::save(std::shared_ptr<GeometryPrimitive> primitive) {
     }
     
     bool success = (mysql_stmt_execute(stmt) == 0);
-    mysql_stmt_close(stmt);
     
+    if (success) {
+        // 获取数据库自动生成的ID并设置到对象中
+        my_ulonglong insertId = mysql_stmt_insert_id(stmt);
+        primitive->setId(static_cast<int>(insertId));
+    }
+    
+    mysql_stmt_close(stmt);
     return success;
 }
 
@@ -507,8 +489,7 @@ bool GeometryDAO::deleteAll() {
         return false;
     }
     
-    // 重置ID计数器
-    nextId = 1;
+    // 不再需要重置ID计数器，因为我们使用数据库自增ID
     
     return true;
 }
@@ -570,7 +551,7 @@ void GeometryDAO::createGeometryTable() {
     
     std::string createGeometryTable = 
         "CREATE TABLE IF NOT EXISTS geometry ("
-        "id INT PRIMARY KEY,"
+        "id INT AUTO_INCREMENT PRIMARY KEY,"
         "name VARCHAR(255),"
         "type VARCHAR(50) NOT NULL,"
         "color VARCHAR(50),"
@@ -585,16 +566,5 @@ void GeometryDAO::createGeometryTable() {
         std::cerr << "Error creating geometry table: " << mysql_error(connection) << std::endl;
     }
     
-    // 初始化nextId为当前表中最大ID+1
-    std::string maxIdQuery = "SELECT COALESCE(MAX(id), 0) + 1 FROM geometry";
-    if (mysql_query(connection, maxIdQuery.c_str()) == 0) {
-        MYSQL_RES* res = mysql_store_result(connection);
-        if (res) {
-            MYSQL_ROW row = mysql_fetch_row(res);
-            if (row && row[0]) {
-                nextId = std::atoi(row[0]);
-            }
-            mysql_free_result(res);
-        }
-    }
+    // 不再需要初始化nextId，因为我们使用数据库自增ID
 }
