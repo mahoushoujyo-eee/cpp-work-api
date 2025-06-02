@@ -188,17 +188,26 @@ std::shared_ptr<GeometryPrimitive> GeometryService::getPrimitiveById(int id) {
 
 // 更新图元
 bool GeometryService::updatePrimitive(int id, const Json::Value& data) {
+    // 1. 尝试从数据库或容器中获取现有图元
+    std::shared_ptr<GeometryPrimitive> existingPrimitive = getPrimitiveById(id);
+    if (!existingPrimitive) {
+        // 如果图元不存在，则无法更新，直接返回false
+        return false;
+    }
+
+    // 2. 从传入的JSON数据创建新的图元对象，用于更新
     auto newPrimitive = createPrimitiveFromJson(data);
     if (!newPrimitive) {
+        // 如果JSON数据无效，则无法更新，返回false
         return false;
     }
     
-    // 设置正确的ID
+    // 3. 设置正确的ID，确保更新的是指定ID的图元
     newPrimitive->setId(id);
     
     if (useDatabaseMode && dao) {
         // 数据库模式：更新数据库
-        return dao->save(newPrimitive);
+        return dao->update(newPrimitive);
     } else {
         // 容器模式：更新容器
         return container->updatePrimitive(id, newPrimitive);
