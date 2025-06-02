@@ -27,8 +27,7 @@ private:
     // 初始化数据库连接
     void initConnection();
     
-    // 创建统一的几何图元表
-    void createGeometryTable();
+
     
     // 辅助函数：从结果集创建几何图元对象
     std::shared_ptr<GeometryPrimitive> createGeometryFromResult(MYSQL_RES* result);

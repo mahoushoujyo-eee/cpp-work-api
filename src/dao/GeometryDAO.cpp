@@ -132,7 +132,6 @@ std::shared_ptr<GeometryPrimitive> GeometryDAO::createGeometryFromResult(MYSQL_R
 GeometryDAO::GeometryDAO() : connection(nullptr) {
     try {
         initConnection();
-        createGeometryTable();
     } catch (const std::exception& e) {
         std::cerr << "GeometryDAO initialization failed: " << e.what() << std::endl;
     }
@@ -142,7 +141,6 @@ GeometryDAO::GeometryDAO() : connection(nullptr) {
 GeometryDAO::GeometryDAO(const DatabaseConfig& dbConfig) : config(dbConfig), connection(nullptr) {
     try {
         initConnection();
-        createGeometryTable();
     } catch (const std::exception& e) {
         std::cerr << "GeometryDAO initialization failed: " << e.what() << std::endl;
     }
@@ -541,30 +539,4 @@ void GeometryDAO::initConnection() {
         error_msg += mysql_error(connection ? connection : mysql_init(nullptr));
         throw std::runtime_error(error_msg);
     }
-}
-
-// 创建统一的几何图元表
-void GeometryDAO::createGeometryTable() {
-    if (!connection) {
-        return;
-    }
-    
-    std::string createGeometryTable = 
-        "CREATE TABLE IF NOT EXISTS geometry ("
-        "id INT AUTO_INCREMENT PRIMARY KEY,"
-        "name VARCHAR(255),"
-        "type VARCHAR(50) NOT NULL,"
-        "color VARCHAR(50),"
-        "x DOUBLE DEFAULT 0,"
-        "y DOUBLE DEFAULT 0,"
-        "z DOUBLE DEFAULT 0,"
-        "properties JSON"
-        ")";
-    
-    if (mysql_query(connection, createGeometryTable.c_str())) {
-        // 处理错误
-        std::cerr << "Error creating geometry table: " << mysql_error(connection) << std::endl;
-    }
-    
-    // 不再需要初始化nextId，因为我们使用数据库自增ID
 }
