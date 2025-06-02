@@ -185,6 +185,76 @@ public:
     }
     
 private:
+    // 辅助函数：检查容器是否为空
+    bool checkContainerEmpty(const string& operation = "操作") {
+        if (container.size() == 0) {
+            cout << "容器中没有图元，无法进行" << operation << "!" << endl;
+            return true;
+        }
+        return false;
+    }
+    
+    // 辅助函数：显示搜索结果
+    template<typename T>
+    void displaySearchResults(const vector<T>& results, const string& searchType) {
+        if (results.empty()) {
+            cout << "未找到符合条件的图元!" << endl;
+        } else {
+            cout << "找到 " << results.size() << " 个符合条件的图元:" << endl;
+            for (const auto& item : results) {
+                item->print();
+            }
+        }
+        (void)searchType; // 避免未使用参数警告
+    }
+    
+    // 辅助函数：查找并验证几何体
+    shared_ptr<GeometryPrimitive> findAndValidateGeometry(int id, const string& operation = "操作") {
+        auto geometry = container.findById(id);
+        if (!geometry) {
+            cout << "未找到ID为 " << id << " 的图元，无法进行" << operation << "!" << endl;
+        }
+        return geometry;
+    }
+    
+    // 辅助函数：获取基本几何体信息
+    struct BasicGeometryInfo {
+        string name;
+        string color;
+        Position position;
+    };
+    
+    BasicGeometryInfo getBasicGeometryInfo() {
+        BasicGeometryInfo info;
+        cout << "请输入图元名称: ";
+        cin >> info.name;
+        cout << "请输入图元颜色: ";
+        cin >> info.color;
+        info.position = getPositionInput();
+        return info;
+    }
+    
+    // 辅助函数：获取位置输入
+    Position getPositionInput() {
+        double x, y, z;
+        cout << "请输入位置坐标:" << endl;
+        cout << "X坐标: ";
+        cin >> x;
+        cout << "Y坐标: ";
+        cin >> y;
+        cout << "Z坐标: ";
+        cin >> z;
+        return Position(x, y, z);
+    }
+    
+    // 辅助函数：确认操作
+    bool confirmAction(const string& action) {
+        char confirm;
+        cout << "确认" << action << "? (y/n): ";
+        cin >> confirm;
+        return (confirm == 'y' || confirm == 'Y');
+    }
+    
     void showMainMenu() {
         cout << "\n==================== 主菜单 ====================" << endl;
         cout << "1. 创建几何图元" << endl;
@@ -198,135 +268,114 @@ private:
         cout << "9. 清空容器" << endl;
         cout << "0. 退出程序" << endl;
         cout << "===============================================" << endl;
-        cout << "当前图元数量: " << container.size() << endl;
         cout << "请选择操作: ";
     }
     
     int getChoice() {
         int choice;
         while (!(cin >> choice)) {
-            cout << "请输入有效数字: ";
+            cout << "输入无效，请输入数字: ";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
-        cin.ignore(); // 清除换行符
         return choice;
     }
     
     void createGeometry() {
         cout << "\n=== 创建几何图元 ===" << endl;
+        cout << "请选择要创建的图元类型:" << endl;
         cout << "1. 矩形 (Rectangle)" << endl;
         cout << "2. 圆形 (Circle)" << endl;
-        cout << "3. 立方体 (Cuboid)" << endl;
+        cout << "3. 长方体 (Cuboid)" << endl;
         cout << "4. 圆柱体 (Cylinder)" << endl;
-        cout << "请选择图元类型: ";
+        cout << "请选择: ";
         
-        int type = getChoice();
+        int choice = getChoice();
         
-        string name, color;
-        cout << "请输入图元名称: ";
-        getline(cin, name);
-        cout << "请输入图元颜色: ";
-        getline(cin, color);
+        auto info = getBasicGeometryInfo();
+        shared_ptr<GeometryPrimitive> geometry = nullptr;
         
-        double x, y, z = 0;
-        cout << "请输入位置坐标 x: ";
-        cin >> x;
-        cout << "请输入位置坐标 y: ";
-        cin >> y;
-        
-        Position pos(x, y);
-        
-        shared_ptr<GeometryPrimitive> geometry;
-        
-        switch (type) {
+        switch (choice) {
             case 1: { // 矩形
                 double width, height;
                 cout << "请输入矩形宽度: ";
                 cin >> width;
                 cout << "请输入矩形高度: ";
                 cin >> height;
-                geometry = make_shared<Rectangle>(name, pos, color, width, height);
+                geometry = make_shared<Rectangle>(info.name, info.position, info.color, width, height);
                 break;
             }
             case 2: { // 圆形
                 double radius;
                 cout << "请输入圆形半径: ";
                 cin >> radius;
-                geometry = make_shared<Circle>(name, pos, color, radius);
+                geometry = make_shared<Circle>(info.name, info.position, info.color, radius);
                 break;
             }
-            case 3: { // 立方体
-                cout << "请输入位置坐标 z: ";
-                cin >> z;
-                pos = Position(x, y, z);
+            case 3: { // 长方体
                 double width, height, depth;
-                cout << "请输入立方体宽度: ";
+                cout << "请输入长方体宽度: ";
                 cin >> width;
-                cout << "请输入立方体高度: ";
+                cout << "请输入长方体高度: ";
                 cin >> height;
-                cout << "请输入立方体深度: ";
+                cout << "请输入长方体深度: ";
                 cin >> depth;
-                geometry = make_shared<Cuboid>(name, pos, color, width, height, depth);
+                geometry = make_shared<Cuboid>(info.name, info.position, info.color, width, height, depth);
                 break;
             }
             case 4: { // 圆柱体
-                cout << "请输入位置坐标 z: ";
-                cin >> z;
-                pos = Position(x, y, z);
                 double radius, height;
                 cout << "请输入圆柱体半径: ";
                 cin >> radius;
                 cout << "请输入圆柱体高度: ";
                 cin >> height;
-                geometry = make_shared<Cylinder>(name, pos, color, radius, height);
+                geometry = make_shared<Cylinder>(info.name, info.position, info.color, radius, height);
                 break;
             }
             default:
-                cout << "无效的图元类型!" << endl;
+                cout << "无效选择!" << endl;
                 return;
         }
         
-        container.addPrimitive(geometry);
-        cout << "\n图元创建成功!" << endl;
-        cout << "图元信息: ";
-        geometry->print();
+        if (geometry) {
+            container.addPrimitive(geometry);
+            cout << "图元创建成功! ID: " << geometry->getId() << endl;
+            geometry->print();
+        }
     }
     
     void viewGeometries() {
         cout << "\n=== 查看所有图元 ===" << endl;
-        if (container.size() == 0) {
-            cout << "容器中没有图元!" << endl;
-            return;
-        }
+        if (checkContainerEmpty("查看")) return;
         
-        cout << "总共 " << container.size() << " 个图元:" << endl;
-        cout << "-----------------------------------" << endl;
+        cout << "当前容器中共有 " << container.size() << " 个图元:" << endl;
         container.printAll();
     }
     
     void searchGeometries() {
         cout << "\n=== 搜索图元 ===" << endl;
+        if (checkContainerEmpty("搜索")) return;
+        
+        cout << "请选择搜索方式:" << endl;
         cout << "1. 按ID搜索" << endl;
         cout << "2. 按名称搜索" << endl;
         cout << "3. 按类型搜索" << endl;
         cout << "4. 按颜色搜索" << endl;
         cout << "5. 按面积范围搜索" << endl;
-        cout << "6. 按索引访问" << endl;
-        cout << "请选择搜索方式: ";
+        cout << "6. 按索引搜索" << endl;
+        cout << "请选择: ";
         
         int choice = getChoice();
         
         switch (choice) {
             case 1: { // 按ID搜索
                 int id;
-                cout << "请输入图元ID: ";
+                cout << "请输入要搜索的ID: ";
                 cin >> id;
-                auto found = container.findById(id);
-                if (found) {
-                    cout << "找到图元: ";
-                    found->print();
-                    cout << "面积: " << found->area() << endl;
+                auto geometry = container.findById(id);
+                if (geometry) {
+                    cout << "找到图元:" << endl;
+                    geometry->print();
                 } else {
                     cout << "未找到ID为 " << id << " 的图元!" << endl;
                 }
@@ -334,47 +383,26 @@ private:
             }
             case 2: { // 按名称搜索
                 string name;
-                cout << "请输入图元名称: ";
-                getline(cin, name);
-                auto found = container.findByName(name);
-                if (!found.empty()) {
-                    cout << "找到 " << found.size() << " 个匹配的图元:" << endl;
-                    for (const auto& geometry : found) {
-                        geometry->print();
-                    }
-                } else {
-                    cout << "未找到名称为 \"" << name << "\" 的图元!" << endl;
-                }
+                cout << "请输入要搜索的名称: ";
+                cin >> name;
+                auto results = container.findByName(name);
+                displaySearchResults(results, "名称");
                 break;
             }
             case 3: { // 按类型搜索
                 string type;
-                cout << "请输入图元类型 (Rectangle/Circle/Cuboid/Cylinder): ";
-                getline(cin, type);
-                auto found = container.findByType(type);
-                if (!found.empty()) {
-                    cout << "找到 " << found.size() << " 个 " << type << " 类型的图元:" << endl;
-                    for (const auto& geometry : found) {
-                        geometry->print();
-                    }
-                } else {
-                    cout << "未找到类型为 \"" << type << "\" 的图元!" << endl;
-                }
+                cout << "请输入要搜索的类型 (Rectangle/Circle/Cuboid/Cylinder): ";
+                cin >> type;
+                auto results = container.findByType(type);
+                displaySearchResults(results, "类型");
                 break;
             }
             case 4: { // 按颜色搜索
                 string color;
-                cout << "请输入图元颜色: ";
-                getline(cin, color);
-                auto found = container.findByColor(color);
-                if (!found.empty()) {
-                    cout << "找到 " << found.size() << " 个 " << color << " 颜色的图元:" << endl;
-                    for (const auto& geometry : found) {
-                        geometry->print();
-                    }
-                } else {
-                    cout << "未找到颜色为 \"" << color << "\" 的图元!" << endl;
-                }
+                cout << "请输入要搜索的颜色: ";
+                cin >> color;
+                auto results = container.findByColor(color);
+                displaySearchResults(results, "颜色");
                 break;
             }
             case 5: { // 按面积范围搜索
@@ -383,60 +411,46 @@ private:
                 cin >> minArea;
                 cout << "请输入最大面积: ";
                 cin >> maxArea;
-                auto found = container.findByAreaRange(minArea, maxArea);
-                if (!found.empty()) {
-                    cout << "找到 " << found.size() << " 个面积在 [" << minArea << ", " << maxArea << "] 范围内的图元:" << endl;
-                    for (const auto& geometry : found) {
-                        geometry->print();
-                        cout << "面积: " << geometry->area() << endl;
-                    }
-                } else {
-                    cout << "未找到面积在指定范围内的图元!" << endl;
-                }
+                auto results = container.findByAreaRange(minArea, maxArea);
+                displaySearchResults(results, "面积范围");
                 break;
             }
-            case 6: { // 按索引访问
-                int index;
-                cout << "请输入索引 (0-" << (container.size()-1) << "): ";
-                cin >> index;
-                auto found = container.at(index);
-                if (found) {
-                    cout << "索引 " << index << " 处的图元: ";
-                    found->print();
-                } else {
-                    cout << "无效的索引!" << endl;
-                }
-                break;
-            }
+             case 6: { // 按索引搜索
+                 int index;
+                 cout << "请输入要搜索的索引 (0-" << container.size()-1 << "): ";
+                 cin >> index;
+                 auto geometry = container.at(index);
+                 if (geometry) {
+                     cout << "找到图元:" << endl;
+                     geometry->print();
+                 } else {
+                     cout << "索引 " << index << " 超出范围!" << endl;
+                 }
+                 break;
+             }
             default:
-                cout << "无效的搜索方式!" << endl;
+                cout << "无效选择!" << endl;
         }
     }
     
     void modifyGeometry() {
         cout << "\n=== 修改图元 ===" << endl;
-        if (container.size() == 0) {
-            cout << "容器中没有图元!" << endl;
-            return;
-        }
+        if (checkContainerEmpty("修改")) return;
         
         int id;
         cout << "请输入要修改的图元ID: ";
         cin >> id;
         
-        auto geometry = container.findById(id);
-        if (!geometry) {
-            cout << "未找到ID为 " << id << " 的图元!" << endl;
-            return;
-        }
+        auto geometry = findAndValidateGeometry(id, "修改");
+        if (!geometry) return;
         
         cout << "当前图元信息: ";
         geometry->print();
         
         cout << "\n请选择要修改的属性:" << endl;
-        cout << "1. 名称" << endl;
-        cout << "2. 颜色" << endl;
-        cout << "3. 位置" << endl;
+        cout << "1. 修改名称" << endl;
+        cout << "2. 修改颜色" << endl;
+        cout << "3. 修改位置" << endl;
         cout << "请选择: ";
         
         int choice = getChoice();
@@ -445,7 +459,7 @@ private:
             case 1: { // 修改名称
                 string newName;
                 cout << "请输入新名称: ";
-                getline(cin, newName);
+                cin >> newName;
                 geometry->setName(newName);
                 cout << "名称修改成功!" << endl;
                 break;
@@ -453,26 +467,14 @@ private:
             case 2: { // 修改颜色
                 string newColor;
                 cout << "请输入新颜色: ";
-                getline(cin, newColor);
+                cin >> newColor;
                 geometry->setColor(newColor);
                 cout << "颜色修改成功!" << endl;
                 break;
             }
             case 3: { // 修改位置
-                double x, y, z = 0;
-                cout << "请输入新的x坐标: ";
-                cin >> x;
-                cout << "请输入新的y坐标: ";
-                cin >> y;
-                
-                // 检查是否为3D图元
-                if (geometry->getType() == "Cuboid" || geometry->getType() == "Cylinder") {
-                    cout << "请输入新的z坐标: ";
-                    cin >> z;
-                    geometry->setPosition(Position(x, y, z));
-                } else {
-                    geometry->setPosition(Position(x, y));
-                }
+                Position newPosition = getPositionInput();
+                geometry->setPosition(newPosition);
                 cout << "位置修改成功!" << endl;
                 break;
             }
@@ -481,35 +483,25 @@ private:
                 return;
         }
         
-        cout << "修改后的图元信息: ";
+        cout << "\n修改后的图元信息: ";
         geometry->print();
     }
     
     void deleteGeometry() {
         cout << "\n=== 删除图元 ===" << endl;
-        if (container.size() == 0) {
-            cout << "容器中没有图元!" << endl;
-            return;
-        }
+        if (checkContainerEmpty("删除")) return;
         
         int id;
         cout << "请输入要删除的图元ID: ";
         cin >> id;
         
-        auto geometry = container.findById(id);
-        if (!geometry) {
-            cout << "未找到ID为 " << id << " 的图元!" << endl;
-            return;
-        }
+        auto geometry = findAndValidateGeometry(id, "删除");
+        if (!geometry) return;
         
         cout << "要删除的图元信息: ";
         geometry->print();
         
-        char confirm;
-        cout << "确认删除? (y/n): ";
-        cin >> confirm;
-        
-        if (confirm == 'y' || confirm == 'Y') {
+        if (confirmAction("删除")) {
             bool success = container.deletePrimitive(id);
             if (success) {
                 cout << "图元删除成功!" << endl;
@@ -523,10 +515,7 @@ private:
     
     void sortGeometries() {
         cout << "\n=== 排序图元 ===" << endl;
-        if (container.size() == 0) {
-            cout << "容器中没有图元!" << endl;
-            return;
-        }
+        if (checkContainerEmpty("排序")) return;
         
         cout << "请选择排序方式:" << endl;
         cout << "1. 按ID排序" << endl;
@@ -565,10 +554,7 @@ private:
     
     void exportToJson() {
         cout << "\n=== 导出JSON ===" << endl;
-        if (container.size() == 0) {
-            cout << "容器中没有图元!" << endl;
-            return;
-        }
+        if (checkContainerEmpty("导出")) return;
         
         cout << "请选择导出方式:" << endl;
         cout << "1. 导出单个图元" << endl;
@@ -582,12 +568,10 @@ private:
                 int id;
                 cout << "请输入要导出的图元ID: ";
                 cin >> id;
-                auto geometry = container.findById(id);
+                auto geometry = findAndValidateGeometry(id, "导出");
                 if (geometry) {
                     cout << "图元JSON格式:" << endl;
                     cout << geometry->toJson() << endl;
-                } else {
-                    cout << "未找到指定图元!" << endl;
                 }
                 break;
             }
@@ -612,16 +596,9 @@ private:
     
     void clearContainer() {
         cout << "\n=== 清空容器 ===" << endl;
-        if (container.size() == 0) {
-            cout << "容器已经是空的!" << endl;
-            return;
-        }
+        if (checkContainerEmpty("清空")) return;
         
-        char confirm;
-        cout << "确认清空容器中的所有 " << container.size() << " 个图元? (y/n): ";
-        cin >> confirm;
-        
-        if (confirm == 'y' || confirm == 'Y') {
+        if (confirmAction("清空容器中的所有 " + to_string(container.size()) + " 个图元")) {
             container.clear();
             cout << "容器已清空!" << endl;
         } else {

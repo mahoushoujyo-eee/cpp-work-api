@@ -1,8 +1,5 @@
 #include "GeometryPrimitive.h"
 
-// 初始化静态成员变量
-int GeometryPrimitive::nextId = 0;
-
 // GeometryPrimitive类方法实现
 Json::Value GeometryPrimitive::toJson() const {
     Json::Value json;

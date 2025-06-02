@@ -8,6 +8,19 @@ void GeometryContainer::addPrimitive(std::shared_ptr<GeometryPrimitive> primitiv
         return;
     }
     
+    // 查找当前容器中的最大ID
+    int maxId = 0;
+    Node* current = head;
+    while (current) {
+        if (current->data->getId() > maxId) {
+            maxId = current->data->getId();
+        }
+        current = current->next;
+    }
+    
+    // 设置新图元的ID为最大ID+1
+    primitive->setId(maxId + 1);
+    
     Node* newNode = new Node(primitive);
     
     if (!head) {

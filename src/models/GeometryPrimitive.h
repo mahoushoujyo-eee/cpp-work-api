@@ -19,9 +19,6 @@ public:
 
 // 几何图元基类
 class GeometryPrimitive {
-protected:
-    static int nextId;
-    
 public:
     int id;
     std::string name;
@@ -29,9 +26,9 @@ public:
     std::string color;
     std::string type;
     
-    // 构造函数
+    // 构造函数 - 不再自动设置ID
     GeometryPrimitive(const std::string& name, const Position& pos, const std::string& color, const std::string& type)
-        : id(++nextId), name(name), position(pos), color(color), type(type) {}
+        : id(0), name(name), position(pos), color(color), type(type) {}
     
     // 虚析构函数
     virtual ~GeometryPrimitive() = default;

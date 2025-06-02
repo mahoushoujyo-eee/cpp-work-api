@@ -1,30 +1,24 @@
 [
   {
-    "color" : "#3B82F6",
-    "height" : 50.0,
-    "id" : 1,
-    "name" : "newName",
-    "type" : "Rectangle",
-    "width" : 100.0,
-    "x" : 0.0,
-    "y" : 0.0,
-    "z" : 0.0
-  },
-  {
+    "area" : 125663.70614359173,
     "color" : "#3B82F6",
     "height" : 100.0,
-    "id" : 2,
+    "id" : 1,
     "name" : "\u6d4b\u8bd5\u5706\u67f1",
     "radius" : 100.0,
+    "surfaceArea" : 125663.70614359173,
     "type" : "Cylinder",
+    "volume" : 3141592.653589793,
     "x" : 0.0,
     "y" : 0.0,
     "z" : 0.0
   },
   {
+    "area" : 7853.981633974483,
     "color" : "#3B82F6",
-    "id" : 4,
+    "id" : 2,
     "name" : "\u5bb9\u5668\u5b58\u50a8\u5706\u5f62",
+    "perimeter" : 314.15926535897933,
     "radius" : 50.0,
     "type" : "Circle",
     "x" : 0.0,
@@ -32,15 +26,44 @@
     "z" : 0.0
   },
   {
+    "area" : 32500.0,
     "color" : "#3B82F6",
     "height" : 50.0,
-    "id" : 5,
+    "id" : 3,
     "length" : 75.0,
     "name" : "\u5bb9\u5668\u5b58\u50a8\u7acb\u65b9",
+    "surfaceArea" : 32500.0,
     "type" : "Cuboid",
+    "volume" : 375000.0,
     "width" : 100.0,
     "x" : 0.0,
     "y" : 0.0,
     "z" : 0.0
+  },
+  {
+    "area" : 10000.0,
+    "color" : "red",
+    "height" : 100.0,
+    "id" : 4,
+    "name" : "\u65b0\u589e\u6d4b\u8bd5\u56fe\u5143",
+    "perimeter" : 400.0,
+    "type" : "Rectangle",
+    "width" : 100.0,
+    "x" : 1.0,
+    "y" : 1.0,
+    "z" : 1.0
+  },
+  {
+    "area" : 10000.0,
+    "color" : "red",
+    "height" : 100.0,
+    "id" : 5,
+    "name" : "id\u95ee\u9898\u6d4b\u8bd5",
+    "perimeter" : 400.0,
+    "type" : "Rectangle",
+    "width" : 100.0,
+    "x" : 1.0,
+    "y" : 1.0,
+    "z" : 1.0
   }
 ]
