@@ -59,11 +59,6 @@ public:
     // 获取统计信息
     Json::Value getStatistics();
     
-    // 排序功能
-    void sortPrimitivesById();
-    void sortPrimitivesByArea();
-    void sortPrimitivesByName();
-    
     // 获取图元数量
     size_t getPrimitiveCount();
     
@@ -72,9 +67,6 @@ public:
     
     // 检查数据库是否可用
     bool isDatabaseAvailable();
-    
-    // 同步到数据库
-    bool syncToDatabase();
     
     // 打印统计信息
     void printStatistics();

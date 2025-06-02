@@ -343,33 +343,6 @@ Json::Value GeometryService::getStatistics() {
     return stats;
 }
 
-// 按ID排序
-void GeometryService::sortPrimitivesById() {
-    if (!useDatabaseMode) {
-        // 仅在容器模式下进行排序
-        container->sortById();
-    }
-    // 数据库模式下排序由SQL查询处理
-}
-
-// 按面积排序
-void GeometryService::sortPrimitivesByArea() {
-    if (!useDatabaseMode) {
-        // 仅在容器模式下进行排序
-        container->sortByArea();
-    }
-    // 数据库模式下排序由SQL查询处理
-}
-
-// 按名称排序
-void GeometryService::sortPrimitivesByName() {
-    if (!useDatabaseMode) {
-        // 仅在容器模式下进行排序
-        container->sortByName();
-    }
-    // 数据库模式下排序由SQL查询处理
-}
-
 // 获取图元数量
 size_t GeometryService::getPrimitiveCount() {
     if (useDatabaseMode && dao) {
@@ -400,24 +373,6 @@ bool GeometryService::isDatabaseAvailable() {
         dao->count();
         return true;
     } catch (const std::exception&) {
-        return false;
-    }
-}
-
-// 同步到数据库
-bool GeometryService::syncToDatabase() {
-    if (!useDatabaseMode || !dao) {
-        return false;  // 非数据库模式或dao未初始化，无法同步
-    }
-    
-    try {
-        auto allPrimitives = container->getAllPrimitives();
-        for (const auto& primitive : allPrimitives) {
-            dao->save(primitive);
-        }
-        return true;
-    } catch (const std::exception& e) {
-        std::cerr << "Error syncing to database: " << e.what() << std::endl;
         return false;
     }
 }
