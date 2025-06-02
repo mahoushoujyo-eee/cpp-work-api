@@ -25,7 +25,6 @@ public:
     
     // 析构函数
     ~InteractiveConsole() {
-        // 数据保存已在退出时手动处理
     }
     
     // 从JSON文件加载数据
@@ -70,71 +69,46 @@ public:
     
     // 从JSON对象创建几何图元
     shared_ptr<GeometryPrimitive> createGeometryFromJson(const Json::Value& json) {
-        if (!json.isMember("type") || !json.isMember("name") || 
-            !json.isMember("color") || !json.isMember("x") || 
-            !json.isMember("y") || !json.isMember("z")) {
+        if (!json.isMember("type")) {
             return nullptr;
         }
         
         string type = json["type"].asString();
-        string name = json["name"].asString();
-        string color = json["color"].asString();
-        double x = json["x"].asDouble();
-        double y = json["y"].asDouble();
-        double z = json["z"].asDouble();
+        shared_ptr<GeometryPrimitive> geometry = nullptr;
         
-        Position pos(x, y, z);
-        
+        // 创建对应类型的几何图元实例
         if (type == "Rectangle") {
-            if (!json.isMember("width") || !json.isMember("height")) {
-                return nullptr;
-            }
-            double width = json["width"].asDouble();
-            double height = json["height"].asDouble();
-            auto rect = make_shared<Rectangle>(name, pos, color, width, height);
-            if (json.isMember("id")) {
-                rect->setId(json["id"].asInt());
-            }
-            return rect;
+            geometry = make_shared<Rectangle>("", Position(0, 0, 0), "", 0, 0);
         }
         else if (type == "Circle") {
-            if (!json.isMember("radius")) {
-                return nullptr;
-            }
-            double radius = json["radius"].asDouble();
-            auto circle = make_shared<Circle>(name, pos, color, radius);
-            if (json.isMember("id")) {
-                circle->setId(json["id"].asInt());
-            }
-            return circle;
+            geometry = make_shared<Circle>("", Position(0, 0, 0), "", 0);
         }
         else if (type == "Cuboid") {
-            if (!json.isMember("length") || !json.isMember("width") || !json.isMember("height")) {
-                return nullptr;
-            }
-            double length = json["length"].asDouble();
-            double width = json["width"].asDouble();
-            double height = json["height"].asDouble();
-            auto cuboid = make_shared<Cuboid>(name, pos, color, length, width, height);
-            if (json.isMember("id")) {
-                cuboid->setId(json["id"].asInt());
-            }
-            return cuboid;
+            geometry = make_shared<Cuboid>("", Position(0, 0, 0), "", 0, 0, 0);
         }
         else if (type == "Cylinder") {
-            if (!json.isMember("radius") || !json.isMember("height")) {
-                return nullptr;
-            }
-            double radius = json["radius"].asDouble();
-            double height = json["height"].asDouble();
-            auto cylinder = make_shared<Cylinder>(name, pos, color, radius, height);
-            if (json.isMember("id")) {
-                cylinder->setId(json["id"].asInt());
-            }
-            return cylinder;
+            geometry = make_shared<Cylinder>("", Position(0, 0, 0), "", 0, 0);
         }
         
-        return nullptr;
+        if (geometry) {
+            // 转换扁平化的位置信息为嵌套格式，以兼容fromJson方法
+            Json::Value jsonCopy = json;
+            if (json.isMember("x") && json.isMember("y") && json.isMember("z")) {
+                Json::Value position;
+                position["x"] = json["x"];
+                position["y"] = json["y"];
+                position["z"] = json["z"];
+                jsonCopy["position"] = position;
+            }
+            
+            // 使用已有的fromJson方法进行反序列化
+            geometry->fromJson(jsonCopy);
+            if (json.isMember("id")) {
+                geometry->setId(json["id"].asInt());
+            }
+        }
+        
+        return geometry;
     }
     
     // 保存数据到JSON文件
@@ -149,45 +123,20 @@ public:
         auto allGeometries = container.getAllPrimitives();
         
         for (const auto& geometry : allGeometries) {
-            Json::Value geometryJson;
+            // 使用已有的toJson方法进行序列化
+            Json::Value geometryJson = geometry->toJson();
+            
+            // 添加ID和类型信息（确保包含）
             geometryJson["id"] = geometry->getId();
             geometryJson["type"] = geometry->getType();
-            geometryJson["name"] = geometry->getName();
-            geometryJson["color"] = geometry->getColor();
             
-            Position pos = geometry->getPosition();
-            geometryJson["x"] = pos.x;
-            geometryJson["y"] = pos.y;
-            geometryJson["z"] = pos.z;
-            
-            // 根据类型添加特定属性
-            if (geometry->getType() == "Rectangle") {
-                auto rect = dynamic_pointer_cast<Rectangle>(geometry);
-                if (rect) {
-                    geometryJson["width"] = rect->getWidth();
-                    geometryJson["height"] = rect->getHeight();
-                }
-            }
-            else if (geometry->getType() == "Circle") {
-                auto circle = dynamic_pointer_cast<Circle>(geometry);
-                if (circle) {
-                    geometryJson["radius"] = circle->getRadius();
-                }
-            }
-            else if (geometry->getType() == "Cuboid") {
-                auto cuboid = dynamic_pointer_cast<Cuboid>(geometry);
-                if (cuboid) {
-                    geometryJson["length"] = cuboid->getLength();
-                    geometryJson["width"] = cuboid->getWidth();
-                    geometryJson["height"] = cuboid->getHeight();
-                }
-            }
-            else if (geometry->getType() == "Cylinder") {
-                auto cylinder = dynamic_pointer_cast<Cylinder>(geometry);
-                if (cylinder) {
-                    geometryJson["radius"] = cylinder->getRadius();
-                    geometryJson["height"] = cylinder->getHeight();
-                }
+            // 确保位置信息以扁平化格式存储（兼容旧格式）
+            if (geometryJson.isMember("position")) {
+                Json::Value pos = geometryJson["position"];
+                geometryJson["x"] = pos["x"];
+                geometryJson["y"] = pos["y"];
+                geometryJson["z"] = pos["z"];
+                geometryJson.removeMember("position");
             }
             
             root.append(geometryJson);
