@@ -6,7 +6,6 @@
 #include <sstream>
 #include <iomanip>
 
-// 辅助函数：将属性转换为JSON字符串
 std::string GeometryDAO::propertiesToJson(std::shared_ptr<GeometryPrimitive> primitive) {
     Json::Value properties;
     std::string type = primitive->getType();
@@ -33,7 +32,6 @@ std::string GeometryDAO::propertiesToJson(std::shared_ptr<GeometryPrimitive> pri
     return Json::writeString(builder, properties);
 }
 
-// 辅助函数：从JSON字符串解析属性
 void GeometryDAO::parsePropertiesFromJson(const std::string& jsonStr, std::shared_ptr<GeometryPrimitive> primitive) {
     Json::CharReaderBuilder builder;
     Json::Value properties;
@@ -50,27 +48,22 @@ void GeometryDAO::parsePropertiesFromJson(const std::string& jsonStr, std::share
     if (type == "Rectangle") {
         auto rect = std::dynamic_pointer_cast<Rectangle>(primitive);
         if (properties.isMember("width") && properties.isMember("height")) {
-            // Rectangle properties are set during construction
         }
     } else if (type == "Circle") {
         auto circle = std::dynamic_pointer_cast<Circle>(primitive);
         if (properties.isMember("radius")) {
-            // Circle properties are set during construction
         }
     } else if (type == "Cuboid") {
         auto cuboid = std::dynamic_pointer_cast<Cuboid>(primitive);
         if (properties.isMember("width") && properties.isMember("height") && properties.isMember("depth")) {
-            // Cuboid properties are set during construction
         }
     } else if (type == "Cylinder") {
         auto cylinder = std::dynamic_pointer_cast<Cylinder>(primitive);
         if (properties.isMember("radius") && properties.isMember("height")) {
-            // Cylinder properties are set during construction
         }
     }
 }
 
-// 辅助函数：从结果集创建几何图元对象
 std::shared_ptr<GeometryPrimitive> GeometryDAO::createGeometryFromResult(MYSQL_RES* result) {
     MYSQL_ROW row = mysql_fetch_row(result);
     if (!row) {
@@ -86,7 +79,6 @@ std::shared_ptr<GeometryPrimitive> GeometryDAO::createGeometryFromResult(MYSQL_R
     double z = row[6] ? std::atof(row[6]) : 0.0;
     std::string propertiesJson = row[7] ? row[7] : "{}";
     
-    // 解析JSON属性
     Json::CharReaderBuilder builder;
     Json::Value properties;
     std::string errors;
@@ -121,12 +113,10 @@ std::shared_ptr<GeometryPrimitive> GeometryDAO::createGeometryFromResult(MYSQL_R
         primitive->setId(id);
     }
     
-    // 不再需要更新nextId，因为我们使用数据库自增ID
     
     return primitive;
 }
 
-// 构造函数
 GeometryDAO::GeometryDAO() : connection(nullptr) {
     try {
         initConnection();
@@ -135,7 +125,6 @@ GeometryDAO::GeometryDAO() : connection(nullptr) {
     }
 }
 
-// 带配置参数的构造函数
 GeometryDAO::GeometryDAO(const DatabaseConfig& dbConfig) : config(dbConfig), connection(nullptr) {
     try {
         initConnection();
@@ -144,14 +133,12 @@ GeometryDAO::GeometryDAO(const DatabaseConfig& dbConfig) : config(dbConfig), con
     }
 }
 
-// 析构函数
 GeometryDAO::~GeometryDAO() {
     if (connection) {
         mysql_close(connection);
     }
 }
 
-// 保存图元到数据库
 bool GeometryDAO::save(std::shared_ptr<GeometryPrimitive> primitive) {
     if (!connection || !primitive) {
         return false;
@@ -174,25 +161,21 @@ bool GeometryDAO::save(std::shared_ptr<GeometryPrimitive> primitive) {
     MYSQL_BIND bind[7];
     memset(bind, 0, sizeof(bind));
     
-    // name
     std::string name = primitive->getName();
     bind[0].buffer_type = MYSQL_TYPE_STRING;
     bind[0].buffer = const_cast<char*>(name.c_str());
     bind[0].buffer_length = name.length();
     
-    // type
     std::string type = primitive->getType();
     bind[1].buffer_type = MYSQL_TYPE_STRING;
     bind[1].buffer = const_cast<char*>(type.c_str());
     bind[1].buffer_length = type.length();
     
-    // color
     std::string color = primitive->getColor();
     bind[2].buffer_type = MYSQL_TYPE_STRING;
     bind[2].buffer = const_cast<char*>(color.c_str());
     bind[2].buffer_length = color.length();
     
-    // x, y, z
     double x = primitive->getPosition().x;
     double y = primitive->getPosition().y;
     double z = primitive->getPosition().z;
@@ -203,7 +186,6 @@ bool GeometryDAO::save(std::shared_ptr<GeometryPrimitive> primitive) {
     bind[5].buffer_type = MYSQL_TYPE_DOUBLE;
     bind[5].buffer = &z;
     
-    // properties
     bind[6].buffer_type = MYSQL_TYPE_STRING;
     bind[6].buffer = const_cast<char*>(properties.c_str());
     bind[6].buffer_length = properties.length();
@@ -216,7 +198,6 @@ bool GeometryDAO::save(std::shared_ptr<GeometryPrimitive> primitive) {
     bool success = (mysql_stmt_execute(stmt) == 0);
     
     if (success) {
-        // 获取数据库自动生成的ID并设置到对象中
         my_ulonglong insertId = mysql_stmt_insert_id(stmt);
         primitive->setId(static_cast<int>(insertId));
     }
@@ -225,7 +206,6 @@ bool GeometryDAO::save(std::shared_ptr<GeometryPrimitive> primitive) {
     return success;
 }
 
-// 根据ID查找图元
 std::shared_ptr<GeometryPrimitive> GeometryDAO::findById(int id) {
     if (!connection) {
         return nullptr;
@@ -247,7 +227,6 @@ std::shared_ptr<GeometryPrimitive> GeometryDAO::findById(int id) {
     return primitive;
 }
 
-// 查找所有图元
 std::vector<std::shared_ptr<GeometryPrimitive>> GeometryDAO::findAll() {
     std::vector<std::shared_ptr<GeometryPrimitive>> result;
     
@@ -275,7 +254,6 @@ std::vector<std::shared_ptr<GeometryPrimitive>> GeometryDAO::findAll() {
     return result;
 }
 
-// 根据类型查找图元
 std::vector<std::shared_ptr<GeometryPrimitive>> GeometryDAO::findByType(const std::string& type) {
     std::vector<std::shared_ptr<GeometryPrimitive>> result;
     
@@ -302,7 +280,7 @@ std::vector<std::shared_ptr<GeometryPrimitive>> GeometryDAO::findByType(const st
     return result;
 }
 
-// 更新图元
+
 bool GeometryDAO::update(std::shared_ptr<GeometryPrimitive> primitive) {
     if (!connection || !primitive) {
         return false;
@@ -325,25 +303,21 @@ bool GeometryDAO::update(std::shared_ptr<GeometryPrimitive> primitive) {
     MYSQL_BIND bind[8];
     memset(bind, 0, sizeof(bind));
     
-    // name
     std::string name = primitive->getName();
     bind[0].buffer_type = MYSQL_TYPE_STRING;
     bind[0].buffer = const_cast<char*>(name.c_str());
     bind[0].buffer_length = name.length();
     
-    // type
     std::string type = primitive->getType();
     bind[1].buffer_type = MYSQL_TYPE_STRING;
     bind[1].buffer = const_cast<char*>(type.c_str());
     bind[1].buffer_length = type.length();
     
-    // color
     std::string color = primitive->getColor();
     bind[2].buffer_type = MYSQL_TYPE_STRING;
     bind[2].buffer = const_cast<char*>(color.c_str());
     bind[2].buffer_length = color.length();
     
-    // x, y, z
     double x = primitive->getPosition().x;
     double y = primitive->getPosition().y;
     double z = primitive->getPosition().z;
@@ -354,12 +328,10 @@ bool GeometryDAO::update(std::shared_ptr<GeometryPrimitive> primitive) {
     bind[5].buffer_type = MYSQL_TYPE_DOUBLE;
     bind[5].buffer = &z;
     
-    // properties
     bind[6].buffer_type = MYSQL_TYPE_STRING;
     bind[6].buffer = const_cast<char*>(properties.c_str());
     bind[6].buffer_length = properties.length();
     
-    // id
     int id = primitive->getId();
     bind[7].buffer_type = MYSQL_TYPE_LONG;
     bind[7].buffer = &id;
@@ -379,7 +351,6 @@ bool GeometryDAO::update(std::shared_ptr<GeometryPrimitive> primitive) {
     return success;
 }
 
-// 根据ID删除图元
 bool GeometryDAO::deleteById(int id) {
     if (!connection) {
         return false;
@@ -417,7 +388,6 @@ bool GeometryDAO::deleteById(int id) {
     return success;
 }
 
-// 删除所有图元
 bool GeometryDAO::deleteAll() {
     if (!connection) {
         return false;
@@ -432,7 +402,6 @@ bool GeometryDAO::deleteAll() {
     return true;
 }
 
-// 统计图元总数
 int GeometryDAO::count() {
     if (!connection) {
         return 0;
@@ -459,7 +428,6 @@ int GeometryDAO::count() {
     return total;
 }
 
-// 初始化数据库连接
 void GeometryDAO::initConnection() {
     connection = mysql_init(nullptr);
     if (!connection) {
