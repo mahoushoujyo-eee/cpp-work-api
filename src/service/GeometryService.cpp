@@ -393,7 +393,6 @@ std::vector<std::shared_ptr<GeometryPrimitive>> GeometryService::getPrimitivesBy
 // 打印统计信息
 void GeometryService::printStatistics() {
     if (useDatabaseMode && dao) {
-        // 数据库模式：获取所有数据后打印统计
         auto allPrimitives = getAllPrimitives();
         std::cout << "=== 几何图元统计信息 ===" << std::endl;
         std::cout << "总数量: " << allPrimitives.size() << std::endl;
@@ -408,7 +407,6 @@ void GeometryService::printStatistics() {
             std::cout << "  " << pair.first << ": " << pair.second << std::endl;
         }
     } else {
-        // 容器模式：直接使用容器的打印方法
         container->printStatistics();
     }
 }

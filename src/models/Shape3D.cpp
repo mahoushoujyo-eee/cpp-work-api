@@ -1,6 +1,5 @@
 #include "Shape3D.h"
 
-// Cuboid类方法实现
 double Cuboid::volume() const {
     return length * width * height;
 }
@@ -32,7 +31,6 @@ void Cuboid::fromJson(const Json::Value& json) {
     height = json["height"].asDouble();
 }
 
-// Cylinder类方法实现
 double Cylinder::volume() const {
     return M_PI * radius * radius * height;
 }

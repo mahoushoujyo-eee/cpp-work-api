@@ -6,8 +6,6 @@
 #include <sstream>
 #include <iomanip>
 
-// 不再需要静态ID生成器相关代码，使用数据库自增ID
-
 // 辅助函数：将属性转换为JSON字符串
 std::string GeometryDAO::propertiesToJson(std::shared_ptr<GeometryPrimitive> primitive) {
     Json::Value properties;
@@ -430,9 +428,7 @@ bool GeometryDAO::deleteAll() {
     if (mysql_query(connection, sql.c_str())) {
         return false;
     }
-    
-    // 不再需要重置ID计数器，因为我们使用数据库自增ID
-    
+        
     return true;
 }
 

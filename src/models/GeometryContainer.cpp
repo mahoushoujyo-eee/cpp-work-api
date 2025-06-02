@@ -1,7 +1,6 @@
 #include "GeometryContainer.h"
 #include <map>
 
-// GeometryContainer类方法实现
 void GeometryContainer::addPrimitive(std::shared_ptr<GeometryPrimitive> primitive) {
     if (!primitive) {
         std::cerr << "添加的图元指针为空" << std::endl;

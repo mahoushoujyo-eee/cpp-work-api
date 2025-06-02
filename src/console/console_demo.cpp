@@ -368,7 +368,7 @@ private:
         int choice = getChoice();
         
         switch (choice) {
-            case 1: { // 按ID搜索
+            case 1: { 
                 int id;
                 cout << "请输入要搜索的ID: ";
                 cin >> id;
@@ -381,7 +381,7 @@ private:
                 }
                 break;
             }
-            case 2: { // 按名称搜索
+            case 2: { 
                 string name;
                 cout << "请输入要搜索的名称: ";
                 cin >> name;
@@ -389,7 +389,7 @@ private:
                 displaySearchResults(results, "名称");
                 break;
             }
-            case 3: { // 按类型搜索
+            case 3: { 
                 string type;
                 cout << "请输入要搜索的类型 (Rectangle/Circle/Cuboid/Cylinder): ";
                 cin >> type;
@@ -397,7 +397,7 @@ private:
                 displaySearchResults(results, "类型");
                 break;
             }
-            case 4: { // 按颜色搜索
+            case 4: { 
                 string color;
                 cout << "请输入要搜索的颜色: ";
                 cin >> color;
@@ -405,7 +405,7 @@ private:
                 displaySearchResults(results, "颜色");
                 break;
             }
-            case 5: { // 按面积范围搜索
+            case 5: { 
                 double minArea, maxArea;
                 cout << "请输入最小面积: ";
                 cin >> minArea;
@@ -415,7 +415,7 @@ private:
                 displaySearchResults(results, "面积范围");
                 break;
             }
-             case 6: { // 按索引搜索
+             case 6: { 
                  int index;
                  cout << "请输入要搜索的索引 (0-" << container.size()-1 << "): ";
                  cin >> index;
@@ -456,7 +456,7 @@ private:
         int choice = getChoice();
         
         switch (choice) {
-            case 1: { // 修改名称
+            case 1: { 
                 string newName;
                 cout << "请输入新名称: ";
                 cin >> newName;
@@ -464,7 +464,7 @@ private:
                 cout << "名称修改成功!" << endl;
                 break;
             }
-            case 2: { // 修改颜色
+            case 2: { 
                 string newColor;
                 cout << "请输入新颜色: ";
                 cin >> newColor;
@@ -472,7 +472,7 @@ private:
                 cout << "颜色修改成功!" << endl;
                 break;
             }
-            case 3: { // 修改位置
+            case 3: { 
                 Position newPosition = getPositionInput();
                 geometry->setPosition(newPosition);
                 cout << "位置修改成功!" << endl;
@@ -564,7 +564,7 @@ private:
         int choice = getChoice();
         
         switch (choice) {
-            case 1: { // 导出单个图元
+            case 1: { 
                 int id;
                 cout << "请输入要导出的图元ID: ";
                 cin >> id;
@@ -575,7 +575,7 @@ private:
                 }
                 break;
             }
-            case 2: { // 导出所有图元
+            case 2: {
                 cout << "所有图元的JSON格式:" << endl;
                 cout << "[" << endl;
                 auto allGeometries = container.getAllPrimitives();

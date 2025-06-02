@@ -2,14 +2,12 @@
 #include <iostream>
 #include <sstream>
 
-// 设置CORS头
 void GeometryController::setCorsHeaders(httplib::Response& res) {
     res.set_header("Access-Control-Allow-Origin", "*");
     res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization");
 }
 
-// 解析JSON请求体
 Json::Value GeometryController::parseJson(const std::string& body) {
     Json::Value json;
     Json::Reader reader;
@@ -21,14 +19,12 @@ Json::Value GeometryController::parseJson(const std::string& body) {
     return json;
 }
 
-// 序列化JSON响应
 std::string GeometryController::serializeJson(const Json::Value& json) {
     Json::StreamWriterBuilder builder;
     builder["indentation"] = "";
     return Json::writeString(builder, json);
 }
 
-// 发送错误响应
 void GeometryController::sendErrorResponse(httplib::Response& res, int statusCode, const std::string& message) {
     setCorsHeaders(res);
     
@@ -40,7 +36,6 @@ void GeometryController::sendErrorResponse(httplib::Response& res, int statusCod
     res.set_content(serializeJson(error), "application/json");
 }
 
-// 发送成功响应
 void GeometryController::sendSuccessResponse(httplib::Response& res, const Json::Value& data) {
     setCorsHeaders(res);
     
@@ -52,30 +47,24 @@ void GeometryController::sendSuccessResponse(httplib::Response& res, const Json:
     res.set_content(serializeJson(response), "application/json");
 }
 
-// 构造函数
 GeometryController::GeometryController() {
-    // 不在构造函数中创建service，等待外部设置
+    
 }
 
-// 带数据库配置的构造函数
 GeometryController::GeometryController(const DatabaseConfig& dbConfig) : service(std::make_shared<GeometryService>(dbConfig)) {
-    // 保留原有逻辑用于向后兼容
+    
 }
 
-// 设置服务实例
 void GeometryController::setService(std::shared_ptr<GeometryService> servicePtr) {
     service = std::move(servicePtr);
 }
 
-// 注册路由
 void GeometryController::registerRoutes(httplib::Server& server) {
-    // 处理CORS预检请求
     server.Options(".*", [this](const httplib::Request&, httplib::Response& res) {
         setCorsHeaders(res);
         res.status = 200;
     });
     
-    // 健康检查
     server.Get("/health", [this](const httplib::Request&, httplib::Response& res) {
         setCorsHeaders(res);
         
@@ -88,16 +77,13 @@ void GeometryController::registerRoutes(httplib::Server& server) {
         sendSuccessResponse(res, health);
     });
     
-    // 获取所有图元
     server.Get("/primitives", [this](const httplib::Request& req, httplib::Response& res) {
         std::cout << "\n=== GET /primitives 请求开始 ===" << std::endl;
         std::cout << "请求时间: " << std::time(nullptr) << std::endl;
         
-        // 输出请求参数
         std::cout << "查询参数: ";
         bool hasParams = false;
         
-        // 检查是否有查询参数
         for (const auto& param : req.params) {
             std::cout << param.first << "=" << param.second << " ";
             hasParams = true;
@@ -119,7 +105,6 @@ void GeometryController::registerRoutes(httplib::Server& server) {
         std::cout << "=== GET /primitives 请求结束 ===\n" << std::endl;
     });
     
-    // 根据ID获取图元
     server.Get(R"(/primitives/(\d+))", [this](const httplib::Request& req, httplib::Response& res) {
         try {
             int id = std::stoi(req.matches[1]);
@@ -135,7 +120,6 @@ void GeometryController::registerRoutes(httplib::Server& server) {
         }
     });
     
-    // 创建新图元
     server.Post("/primitives", [this](const httplib::Request& req, httplib::Response& res) {
         try {
             Json::Value data = parseJson(req.body);
@@ -151,7 +135,6 @@ void GeometryController::registerRoutes(httplib::Server& server) {
         }
     });
     
-    // 更新图元
     server.Put(R"(/primitives/(\d+))", [this](const httplib::Request& req, httplib::Response& res) {
         try {
             int id = std::stoi(req.matches[1]);
@@ -168,7 +151,6 @@ void GeometryController::registerRoutes(httplib::Server& server) {
         }
     });
     
-    // 删除图元
     server.Delete(R"(/primitives/(\d+))", [this](const httplib::Request& req, httplib::Response& res) {
         try {
             int id = std::stoi(req.matches[1]);
@@ -185,7 +167,6 @@ void GeometryController::registerRoutes(httplib::Server& server) {
         }
     });
     
-    // 删除所有图元
     server.Delete("/primitives", [this](const httplib::Request&, httplib::Response& res) {
         try {
             if (service->deleteAllPrimitives()) {
@@ -200,7 +181,6 @@ void GeometryController::registerRoutes(httplib::Server& server) {
         }
     });
     
-    // 获取统计信息
     server.Get("/statistics", [this](const httplib::Request&, httplib::Response& res) {
         try {
             Json::Value stats = service->getStatistics();
@@ -210,7 +190,6 @@ void GeometryController::registerRoutes(httplib::Server& server) {
         }
     });
     
-    // 根据类型获取图元
     server.Get(R"(/primitives/type/(.+))", [this](const httplib::Request& req, httplib::Response& res) {
         try {
             std::string type = req.matches[1];
@@ -228,7 +207,6 @@ void GeometryController::registerRoutes(httplib::Server& server) {
     });
 }
 
-// 启动服务器
 void GeometryController::start(const std::string& host, int port) {
     std::cout << "Starting Geometry API Server on " << host << ":" << port << std::endl;
     
@@ -238,7 +216,6 @@ void GeometryController::start(const std::string& host, int port) {
     }
 }
 
-// 停止服务器
 void GeometryController::stop() {
     server.stop();
 }
