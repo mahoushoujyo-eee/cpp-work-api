@@ -146,7 +146,7 @@ void saveDataToFile(GeometryService& service, const std::string& filename) {
     }
 }
 
-// 创建默认测试数据
+// 兜底处理， 如果读取json出现失败用这个内容模拟
 void createDefaultTestData(GeometryService& service) {
     try {
         // 创建2D图元
