@@ -158,9 +158,7 @@ bool GeometryDAO::save(std::shared_ptr<GeometryPrimitive> primitive) {
     if (!connection || !primitive) {
         return false;
     }
-    
-    // 不再手动设置ID，让数据库自动生成
-    
+        
     std::string properties = propertiesToJson(primitive);
     
     std::string sql = "INSERT INTO geometry (name, type, color, x, y, z, properties) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -288,60 +286,6 @@ std::vector<std::shared_ptr<GeometryPrimitive>> GeometryDAO::findByType(const st
     }
     
     std::string query = "SELECT id, name, type, color, x, y, z, properties FROM geometry WHERE type = '" + type + "' ORDER BY id";
-    if (mysql_query(connection, query.c_str())) {
-        return result;
-    }
-    
-    MYSQL_RES* res = mysql_store_result(connection);
-    if (!res) {
-        return result;
-    }
-    
-    std::shared_ptr<GeometryPrimitive> primitive;
-    while ((primitive = createGeometryFromResult(res))) {
-        result.push_back(primitive);
-    }
-    
-    mysql_free_result(res);
-    return result;
-}
-
-// 根据名称查找图元
-std::vector<std::shared_ptr<GeometryPrimitive>> GeometryDAO::findByName(const std::string& name) {
-    std::vector<std::shared_ptr<GeometryPrimitive>> result;
-    
-    if (!connection) {
-        return result;
-    }
-    
-    std::string query = "SELECT id, name, type, color, x, y, z, properties FROM geometry WHERE name = '" + name + "' ORDER BY id";
-    if (mysql_query(connection, query.c_str())) {
-        return result;
-    }
-    
-    MYSQL_RES* res = mysql_store_result(connection);
-    if (!res) {
-        return result;
-    }
-    
-    std::shared_ptr<GeometryPrimitive> primitive;
-    while ((primitive = createGeometryFromResult(res))) {
-        result.push_back(primitive);
-    }
-    
-    mysql_free_result(res);
-    return result;
-}
-
-// 根据颜色查找图元
-std::vector<std::shared_ptr<GeometryPrimitive>> GeometryDAO::findByColor(const std::string& color) {
-    std::vector<std::shared_ptr<GeometryPrimitive>> result;
-    
-    if (!connection) {
-        return result;
-    }
-    
-    std::string query = "SELECT id, name, type, color, x, y, z, properties FROM geometry WHERE color = '" + color + "' ORDER BY id";
     if (mysql_query(connection, query.c_str())) {
         return result;
     }

@@ -237,57 +237,6 @@ bool GeometryService::deleteAllPrimitives() {
     }
 }
 
-// 根据类型获取图元
-std::vector<std::shared_ptr<GeometryPrimitive>> GeometryService::getPrimitivesByType(const std::string& type) {
-    if (useDatabaseMode && dao) {
-        // 数据库模式：从数据库查询
-        return dao->findByType(type);
-    } else {
-        // 容器模式：从容器查询
-        return container->findByType(type);
-    }
-}
-
-// 根据名称获取图元
-std::vector<std::shared_ptr<GeometryPrimitive>> GeometryService::getPrimitivesByName(const std::string& name) {
-    if (useDatabaseMode && dao) {
-        // 数据库模式：从数据库查询
-        return dao->findByName(name);
-    } else {
-        // 容器模式：从容器查询
-        return container->findByName(name);
-    }
-}
-
-// 根据颜色获取图元
-std::vector<std::shared_ptr<GeometryPrimitive>> GeometryService::getPrimitivesByColor(const std::string& color) {
-    if (useDatabaseMode && dao) {
-        // 数据库模式：从数据库查询
-        return dao->findByColor(color);
-    } else {
-        // 容器模式：从容器查询
-        return container->findByColor(color);
-    }
-}
-
-// 根据面积范围获取图元
-std::vector<std::shared_ptr<GeometryPrimitive>> GeometryService::getPrimitivesByAreaRange(double minArea, double maxArea) {
-    if (useDatabaseMode && dao) {
-        // 数据库模式：获取所有图元然后过滤
-        auto allPrimitives = dao->findAll();
-        std::vector<std::shared_ptr<GeometryPrimitive>> result;
-        for (auto primitive : allPrimitives) {
-            double area = primitive->area();
-            if (area >= minArea && area <= maxArea) {
-                result.push_back(primitive);
-            }
-        }
-        return result;
-    } else {
-        return container->findByAreaRange(minArea, maxArea);
-    }
-}
-
 // 获取所有图元
 std::vector<std::shared_ptr<GeometryPrimitive>> GeometryService::getAllPrimitives() {
     std::cout << "=== GeometryService::getAllPrimitives 调用开始 ===" << std::endl;
@@ -471,6 +420,19 @@ bool GeometryService::syncToDatabase() {
         std::cerr << "Error syncing to database: " << e.what() << std::endl;
         return false;
     }
+}
+
+// 根据类型获取图元
+std::vector<std::shared_ptr<GeometryPrimitive>> GeometryService::getPrimitivesByType(const std::string& type) {
+    std::vector<std::shared_ptr<GeometryPrimitive>> result;
+    if (useDatabaseMode && dao) {
+        // 数据库模式：从数据库查询
+        result = dao->findByType(type);
+    } else {
+        // 容器模式：从容器查询
+        result = container->findByType(type);
+    }
+    return result;
 }
 
 // 打印统计信息

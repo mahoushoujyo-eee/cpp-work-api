@@ -96,80 +96,23 @@ void GeometryController::registerRoutes(httplib::Server& server) {
         // 输出请求参数
         std::cout << "查询参数: ";
         bool hasParams = false;
-        if (req.has_param("type")) {
-            std::cout << "type=" << req.get_param_value("type") << " ";
+        
+        // 检查是否有查询参数
+        for (const auto& param : req.params) {
+            std::cout << param.first << "=" << param.second << " ";
             hasParams = true;
         }
-        if (req.has_param("name")) {
-            std::cout << "name=" << req.get_param_value("name") << " ";
-            hasParams = true;
-        }
-        if (req.has_param("color")) {
-            std::cout << "color=" << req.get_param_value("color") << " ";
-            hasParams = true;
-        }
-        if (req.has_param("minArea")) {
-            std::cout << "minArea=" << req.get_param_value("minArea") << " ";
-            hasParams = true;
-        }
-        if (req.has_param("maxArea")) {
-            std::cout << "maxArea=" << req.get_param_value("maxArea") << " ";
-            hasParams = true;
-        }
+        
         if (!hasParams) {
             std::cout << "无查询参数（获取所有图元）";
         }
         std::cout << std::endl;
         
         try {
-            Json::Value result(Json::arrayValue);
-            
-            // 检查查询参数
-            if (req.has_param("type")) {
-                std::cout << "执行按类型查询: " << req.get_param_value("type") << std::endl;
-                auto primitives = service->getPrimitivesByType(req.get_param_value("type"));
-                std::cout << "按类型查询结果: 找到 " << primitives.size() << " 个图元" << std::endl;
-                for (const auto& primitive : primitives) {
-                    result.append(primitive->toJson());
-                }
-            } else if (req.has_param("name")) {
-                std::cout << "执行按名称查询: " << req.get_param_value("name") << std::endl;
-                auto primitives = service->getPrimitivesByName(req.get_param_value("name"));
-                std::cout << "按名称查询结果: 找到 " << primitives.size() << " 个图元" << std::endl;
-                for (const auto& primitive : primitives) {
-                    result.append(primitive->toJson());
-                }
-            } else if (req.has_param("color")) {
-                std::cout << "执行按颜色查询: " << req.get_param_value("color") << std::endl;
-                auto primitives = service->getPrimitivesByColor(req.get_param_value("color"));
-                std::cout << "按颜色查询结果: 找到 " << primitives.size() << " 个图元" << std::endl;
-                for (const auto& primitive : primitives) {
-                    result.append(primitive->toJson());
-                }
-            } else if (req.has_param("minArea") && req.has_param("maxArea")) {
-                double minArea = std::stod(req.get_param_value("minArea"));
-                double maxArea = std::stod(req.get_param_value("maxArea"));
-                std::cout << "执行按面积范围查询: [" << minArea << ", " << maxArea << "]" << std::endl;
-                auto primitives = service->getPrimitivesByAreaRange(minArea, maxArea);
-                std::cout << "按面积范围查询结果: 找到 " << primitives.size() << " 个图元" << std::endl;
-                for (const auto& primitive : primitives) {
-                    result.append(primitive->toJson());
-                }
-            } else {
-                // 获取所有图元
-                std::cout << "执行获取所有图元操作" << std::endl;
-                auto primitives = service->getAllPrimitives();
-                std::cout << "获取所有图元结果: 总共 " << primitives.size() << " 个图元" << std::endl;
-                for (const auto& primitive : primitives) {
-                    result.append(primitive->toJson());
-                }
-            }
-            
-            std::cout << "构建JSON响应: 包含 " << result.size() << " 个图元" << std::endl;
+            Json::Value result = service->getAllPrimitivesAsJson();
+            std::cout << "返回图元数量: " << result.size() << std::endl;
             sendSuccessResponse(res, result);
-            std::cout << "响应发送成功" << std::endl;
         } catch (const std::exception& e) {
-            std::cout << "处理请求时发生错误: " << e.what() << std::endl;
             sendErrorResponse(res, 500, e.what());
         }
         

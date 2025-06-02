@@ -60,12 +60,6 @@ public:
     // 根据类型查找图元
     std::vector<std::shared_ptr<GeometryPrimitive>> findByType(const std::string& type);
     
-    // 根据名称查找图元
-    std::vector<std::shared_ptr<GeometryPrimitive>> findByName(const std::string& name);
-    
-    // 根据颜色查找图元
-    std::vector<std::shared_ptr<GeometryPrimitive>> findByColor(const std::string& color);
-    
     // 根据ID更新图元
     bool update(std::shared_ptr<GeometryPrimitive> primitive);
     

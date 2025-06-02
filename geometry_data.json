@@ -23,7 +23,7 @@
   },
   {
     "color" : "#3B82F6",
-    "id" : 4,
+    "id" : 3,
     "name" : "\u5bb9\u5668\u5b58\u50a8\u5706\u5f62",
     "radius" : 50.0,
     "type" : "Circle",
@@ -32,11 +32,11 @@
     "z" : 0.0
   },
   {
-    "color" : "#3B82F6",
+    "color" : "#19711a",
     "height" : 50.0,
-    "id" : 5,
+    "id" : 4,
     "length" : 75.0,
-    "name" : "\u5bb9\u5668\u5b58\u50a8\u7acb\u65b9",
+    "name" : "\u5bb9\u5668\u5b58\u50a8\u7acb\u65b91",
     "type" : "Cuboid",
     "width" : 100.0,
     "x" : 0.0,

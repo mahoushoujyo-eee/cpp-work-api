@@ -34,6 +34,9 @@ public:
     
     // 创建图元
     std::shared_ptr<GeometryPrimitive> createPrimitive(const Json::Value& data);
+
+    // 获取所有图元
+    std::vector<std::shared_ptr<GeometryPrimitive>> getAllPrimitives();
     
     // 根据ID获取图元
     std::shared_ptr<GeometryPrimitive> getPrimitiveById(int id);
@@ -49,18 +52,6 @@ public:
     
     // 根据类型获取图元
     std::vector<std::shared_ptr<GeometryPrimitive>> getPrimitivesByType(const std::string& type);
-    
-    // 根据名称获取图元
-    std::vector<std::shared_ptr<GeometryPrimitive>> getPrimitivesByName(const std::string& name);
-    
-    // 根据颜色获取图元
-    std::vector<std::shared_ptr<GeometryPrimitive>> getPrimitivesByColor(const std::string& color);
-    
-    // 根据面积范围获取图元
-    std::vector<std::shared_ptr<GeometryPrimitive>> getPrimitivesByAreaRange(double minArea, double maxArea);
-    
-    // 获取所有图元
-    std::vector<std::shared_ptr<GeometryPrimitive>> getAllPrimitives();
     
     // 获取所有图元的JSON表示
     Json::Value getAllPrimitivesAsJson();
