@@ -17,7 +17,7 @@ void GeometryContainer::addPrimitive(std::shared_ptr<GeometryPrimitive> primitiv
         current = current->next;
     }
     
-    // 设置新图元的ID为最大ID+1
+    // 设置新图元的ID为最大ID+1   模仿数据库的AUTO INCREMENT
     primitive->setId(maxId + 1);
     
     Node* newNode = new Node(primitive);
